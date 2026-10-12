@@ -38,15 +38,15 @@ describe('fixed consolidation state machine', () => {
     const z=bars(51); z.forEach(x=>x.volume=0); z[50]=breakout(z[50],100); expect(detect(z).signals).toHaveLength(0);
     const p=bars(51); p[50]={...breakout(p[50]),high:110}; expect(detect(p).signals).toHaveLength(0);
   });
-  it('requires width <= 5 ATR and small first/last close drift', () => {
-    // All candle ranges and true ranges stay at 2; full window widths are 8, 10, 10.01.
-    for (const peak of [6, 8, 8.01]) {
+  it('requires width <= 4 ATR and small first/last close drift', () => {
+    // All candle ranges and true ranges stay at 2; full window widths are 6, 8, 8.01.
+    for (const peak of [4, 6, 6.01]) {
       const window=bars(50).map((c,i) => {
         const center=i < 49 ? 100 + peak * (1 - Math.abs(i - 24) / 24) : 100;
         return {...c,open:center,high:center+1,low:center-1,close:center};
       });
       expect(wilderAtr(window)[49]).toBe(2);
-      if (peak <= 8) expect(detect(window).waiting).toBeDefined();
+      if (peak <= 6) expect(detect(window).waiting).toBeDefined();
       else expect(detect(window).waiting).toBeUndefined();
     }
     const c=bars(50); c[0].high=150; expect(detect(c).waiting).toBeUndefined();

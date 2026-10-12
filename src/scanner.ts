@@ -27,8 +27,7 @@ export async function scanMarket(signal: AbortSignal, progress: (p: Progress) =>
       try {
         const candles = validateHistory(await client.candles(symbol, marketTime), marketTime);
         const result = detect(candles);
-        entries.push({symbol, turnover: Number(tickers.get(symbol)!.turnover24h), ...result,
-          signals: result.signals.filter(x => x.closeTime >= marketTime - 24 * 3600_000)});
+        entries.push({symbol, turnover: Number(tickers.get(symbol)!.turnover24h), waiting: result.waiting});
       } catch (e) { if (signal.aborted) throw e; failures.push({symbol, reason: errorMessage(e)}); }
       report('확정 15분봉 분석', ++done, eligible.length, entries.length, failures.length);
     }
