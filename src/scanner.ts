@@ -15,7 +15,7 @@ export async function scanMarket(signal: AbortSignal, progress: (p: Progress) =>
     const raw = tickers.get(x.symbol)?.turnover24h;
     const value = raw?.trim() ? Number(raw) : NaN;
     if (!Number.isFinite(value) || value < 0) { failures.push({symbol: x.symbol, reason: '24시간 거래대금 누락 또는 오류'}); return false; }
-    return value >= 10_000_000;
+    return value >= 1_000_000;
   });
   const entries: Entry[] = [];
   let cursor = 0, done = 0;

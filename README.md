@@ -20,7 +20,7 @@ npm run test:browser
 ## 검색과 데이터
 
 - V5 `/market/instruments-info`의 `category=linear`, `status=Trading`을 조회하고 `nextPageCursor`가 없을 때까지 페이지네이션합니다. 반복 커서는 오류입니다. `LinearPerpetual`, `quoteCoin=USDT`, `status=Trading`을 모두 만족해야 합니다.
-- `/market/tickers`의 **turnover24h ≥ 10,000,000 USDT**인 모든 종목을 검색합니다. 상위 50개 등의 개수 제한은 없습니다. 거래대금이 누락되거나 잘못된 종목은 별도로 실패 처리합니다.
+- `/market/tickers`의 **turnover24h ≥ 1,000,000 USDT**인 모든 종목을 검색합니다. 상위 50개 등의 개수 제한은 없습니다. 거래대금이 누락되거나 잘못된 종목은 별도로 실패 처리합니다.
 - 유동성은 현재 조회 시점의 스냅샷입니다. 과거 돌파 시점에도 이 유동성을 충족했는지는 검증하지 않습니다. 시각·종목 목록·거래대금 요청은 순차 호출되므로 완전히 원자적인 스냅샷은 아닙니다.
 - `/market/time`의 거래소 밀리초 시각을 고정 검색 기준으로 사용합니다. `/market/kline`은 **interval=15만** 요청합니다. 기준 시각에서 이미 마감된 1,000봉(약 10.4일)을 요청하고, 분석 전에도 `startTime + 15분 ≤ 기준 시각`을 확인합니다. 검색 도중 새로 마감된 봉은 다음 검색에서 분석합니다.
 - API 응답은 과거→현재로 정렬하며 OHLC, 코인 수량 `volume`, USDT `turnover`, 정렬 경계, 중복·누락, 1,000봉 확보 및 최신 확정봉 존재를 검사합니다. 신규 상장으로 데이터가 부족한 종목은 추정으로 채우지 않습니다.

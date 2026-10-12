@@ -5,14 +5,14 @@ const candles: Candle[] = Array.from({length:1000},(_,i)=>({time:i*INTERVAL,open
 function client(n=75) {
   const symbols=Array.from({length:n},(_,i)=>'COIN'+i+'USDT');
   return {serverTime:vi.fn(async()=>1000*INTERVAL), instruments:vi.fn(async()=>symbols.map(symbol=>({symbol,quoteCoin:'USDT',contractType:'LinearPerpetual',status:'Trading'}))),
-    tickers:vi.fn(async()=>symbols.map(symbol=>({symbol,turnover24h:'10000000',lastPrice:'100'}))), candles:vi.fn(async()=>candles)};
+    tickers:vi.fn(async()=>symbols.map(symbol=>({symbol,turnover24h:'1000000',lastPrice:'100'}))), candles:vi.fn(async()=>candles)};
 }
 it('scans every qualifying instrument beyond top 50 including threshold equality',async()=>{
   const c=client(); const r=await scanMarket(new AbortController().signal,()=>{},c);
   expect(c.candles).toHaveBeenCalledTimes(75); expect(r.eligible).toBe(75); expect(r.entries).toHaveLength(75);
 });
 it('uses turnover24h, reports invalid liquidity and excludes below threshold',async()=>{
-  const c=client(3); c.tickers.mockResolvedValue([{symbol:'COIN0USDT',turnover24h:'9999999',lastPrice:'100'}, {symbol:'COIN1USDT',turnover24h:'',lastPrice:'100'}, {symbol:'COIN2USDT',turnover24h:'10000000',lastPrice:'100'}]);
+  const c=client(3); c.tickers.mockResolvedValue([{symbol:'COIN0USDT',turnover24h:'999999',lastPrice:'100'}, {symbol:'COIN1USDT',turnover24h:'',lastPrice:'100'}, {symbol:'COIN2USDT',turnover24h:'1000000',lastPrice:'100'}]);
   const r=await scanMarket(new AbortController().signal,()=>{},c); expect(r.eligible).toBe(1); expect(r.failures[0].symbol).toBe('COIN1USDT');
 });
 it('preserves successful symbols and reports individual failed histories',async()=>{
