@@ -5,6 +5,7 @@ import type { Box, Failure, Progress, ScanResult } from './types';
 const time = (ms: number) => new Intl.DateTimeFormat('ko-KR', {timeZone: 'Asia/Seoul', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false}).format(ms) + ' KST';
 const number = (n: number) => new Intl.NumberFormat('ko-KR', {maximumSignificantDigits: 8}).format(n);
 function BoxInfo({box}: {box: Box}) { return <><div><dt>고정 박스 상단</dt><dd>{number(box.upper)}</dd></div><div><dt>고정 박스 하단</dt><dd>{number(box.lower)}</dd></div><div><dt>박스 폭 / ATR(14)</dt><dd>{((box.upper-box.lower)/box.atr).toFixed(3)}</dd></div></>; }
+const turnover = (value: number) => `${new Intl.NumberFormat('ko-KR').format(Math.floor(value / 10_000))}만usdt`;
 const chart = (symbol: string) => `https://www.tradingview.com/chart/?symbol=${encodeURIComponent('BYBIT:'+symbol+'.P')}&interval=15`;
 export default function App() {
   const [result, setResult] = useState<ScanResult>();
@@ -47,7 +48,7 @@ export default function App() {
       {attemptFailures.length > 0 && <details open><summary>이번 검색 실패 종목·원인 {attemptFailures.length}개</summary><ul>{attemptFailures.map((f,i)=><li key={i}><strong>{f.symbol}</strong> · {f.reason}</li>)}</ul></details>}
       {result?.failures.length ? <details><summary>실패 종목·원인 {result.failures.length}개</summary><ul>{result.failures.map((f,i)=><li key={i}><strong>{f.symbol}</strong> · {f.reason}</li>)}</ul></details> : null}
     </section>
-    <section><h2>밀집 대기 <span>{waiting.length}</span></h2><p className="muted">검색 기준의 최신 확정봉에서 유효한 박스입니다. 돌파 신호가 아닙니다.</p><div className="cards">{waiting.map(e=><article className="card" key={e.symbol}><h3>{e.symbol} <span className="badge waiting">밀집 대기</span></h3><p>박스 확정 {time(e.waiting!.formedAt)}</p><dl><BoxInfo box={e.waiting!}/><div><dt>대기 경과</dt><dd>{e.waiting!.waited} / 10봉</dd></div><div><dt>현재 24h 거래대금</dt><dd>{number(e.turnover)} USDT</dd></div></dl><a href={chart(e.symbol)} target="_blank" rel="noopener noreferrer">TradingView 15분 차트 ↗</a></article>)}</div>{!waiting.length && <p className="empty">{result ? '현재 밀집 대기 종목이 없습니다.' : '검색 결과가 아직 없습니다.'}</p>}</section>
+    <section><h2>밀집 대기 <span>{waiting.length}</span></h2><p className="muted">검색 기준의 최신 확정봉에서 유효한 박스입니다. 돌파 신호가 아닙니다.</p><div className="cards">{waiting.map(e=><article className="card" key={e.symbol}><h3>{e.symbol} <span className="badge waiting">밀집 대기</span></h3><p>박스 확정 {time(e.waiting!.formedAt)}</p><dl><BoxInfo box={e.waiting!}/><div><dt>대기 경과</dt><dd>{e.waiting!.waited} / 10봉</dd></div><div><dt>현재 24h 거래대금</dt><dd>{turnover(e.turnover)}</dd></div></dl><a href={chart(e.symbol)} target="_blank" rel="noopener noreferrer">TradingView 15분 차트 ↗</a></article>)}</div>{!waiting.length && <p className="empty">{result ? '현재 밀집 대기 종목이 없습니다.' : '검색 결과가 아직 없습니다.'}</p>}</section>
     <footer><p>유동성은 조회 시점 turnover24h 스냅샷입니다. 과거 돌파 시점의 유동성을 검증하지 않습니다.</p><p>확정 1,000봉(약 10.4일)을 재생합니다. 신규 상장·누락 데이터는 실패로 표시합니다. 창을 닫으면 검색하지 않으며 재접속 시 새로 조회합니다.</p><p>공개 API 차단·지역 제한·CORS 문제는 오류로 표시하며 대체 시세를 사용하지 않습니다.</p></footer>
   </main>;
 }
