@@ -79,4 +79,6 @@ npm run test:browser
 4. Actions의 build/deploy가 모두 성공했는지와 실제 배포 URL 응답을 확인합니다. 예상 주소는 `https://yunsangyeong.github.io/coin-consolidation-breakout/`이며, 배포 성공을 확인하기 전에는 배포 완료 주소로 간주하지 마세요.
 5. 실제 배포 사이트에서 Bybit 공개 API 접근·최신 검색을 별도로 확인하세요. GitHub Pages 배포 성공이 Bybit 연결 성공을 뜻하지 않습니다.
 
-클라우드에서 GitHub REST API 접근은 `Forbidden`으로 실패했으므로 현재 Pages 설정과 실행 상태는 확인하지 못했습니다. 환경 설정 초안에 `api.bybit.com`, `api.github.com`과 설치·시작 지침을 저장했으며, 사용자가 환경 설정에서 검토·저장 후 Publish해야 활성 환경 설정에 반영됩니다. 해당 초안 저장은 GitHub Pages 배포가 아닙니다.
+첫 코드 push(`d350784`) 뒤 [Pages 실행 #1](https://github.com/YunSangYeong/coin-consolidation-breakout/actions/runs/38252778234)을 GitHub 공개 화면에서 실제 확인했습니다. 실행은 실패했고 `actions/configure-pages`에서 `Get Pages site failed ... configured to build using GitHub Actions ... Not Found`가 보고되었습니다. 따라서 **Pages 배포는 완료되지 않았습니다**. 저장소 관리자가 위 1단계에서 Pages를 활성화하고 Source를 GitHub Actions로 지정한 뒤 워크플로를 다시 실행해야 합니다. 클라우드의 GitHub REST API는 `Forbidden`이므로 이 설정을 직접 변경하지 못했습니다.
+
+환경 설정 초안에 `api.bybit.com`, `api.github.com`, `yunsangyeong.github.io`와 설치·시작 지침을 저장했습니다. 환경 설정에서 검토·저장 후 Publish해야 활성 환경 설정에 반영됩니다. 해당 초안 저장은 GitHub Pages 배포가 아닙니다. Pages URL의 직접 요청도 클라우드 프록시 CONNECT 403으로 차단되어 사이트의 HTTP 상태를 확인하지 못했습니다.
