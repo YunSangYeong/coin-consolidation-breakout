@@ -46,7 +46,7 @@ export function detect(candles: Candle[]): Detection {
     const upper = Math.max(...window.map(x => x.high));
     const lower = Math.min(...window.map(x => x.low));
     const width = upper - lower;
-    if (atrs[i] > 0 && width <= atrs[i] * 4 && Math.abs(c.close - window[0].close) <= width * .3) {
+    if (atrs[i] > 0 && width <= atrs[i] * 5 && Math.abs(c.close - window[0].close) <= width * .3) {
       formedIndex = i;
       box = { id: String(c.time + INTERVAL), upper, lower, atr: atrs[i], formedAt: c.time + INTERVAL, start: window[0].time };
     }

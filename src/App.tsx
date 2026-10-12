@@ -38,7 +38,7 @@ export default function App() {
   }, []);
   const waiting = result?.entries.filter(e=>e.waiting).sort((a,b)=>b.turnover-a.turnover) ?? [];
   return <main><header><span className="eyebrow">BYBIT · USDT 무기한 · 15분봉</span><h1>코인 밀집 탐지기</h1><p>돌파 전 현재 밀집 대기 중인 종목을 찾습니다.</p></header>
-    <aside className="notice">박스 폭 ≤ ATR(14) × 4 · 24시간 거래대금 ≥ 100만 USDT. 수익성이 검증되지 않은 실험용 설정입니다. 자동 주문·매매 추천 기능은 없습니다.</aside>
+    <aside className="notice">박스 폭 ≤ ATR(14) × 5 · 24시간 거래대금 ≥ 100만 USDT. 수익성이 검증되지 않은 실험용 설정입니다. 자동 주문·매매 추천 기능은 없습니다.</aside>
     <section className="panel"><div className="actions"><button disabled={!!progress} onClick={()=>void search()}>지금 검색</button><button className="secondary" disabled={!progress} onClick={()=>controller.current?.abort()}>검색 취소</button></div>
       <div role="status" aria-live="polite">{progress ? <><p>{progress.stage} · {progress.done} / {progress.total}종목</p><progress value={progress.done} max={progress.total || 1}/><p>조회 성공 {progress.success} · 실패 {progress.failed}</p></> : <p>검색 대기 · 접속 시 자동 검색, 이후 수동 검색</p>}</div>
       {result && <><p>거래 중인 대상 {result.universe} · 유동성 충족 {result.eligible}종목 · 성공 {result.entries.length} · 실패 {result.failures.length}</p><p>마지막 검색 기준: {time(result.marketTime)}</p><p>검색 완료: {time(result.finishedAt)}</p></>}
