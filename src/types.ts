@@ -1,7 +1,7 @@
 export const INTERVAL = 15 * 60_000;
 export interface Candle { time: number; open: number; high: number; low: number; close: number; volume: number; turnover: number }
 export interface Box { id: string; upper: number; lower: number; atr: number; formedAt: number; start: number }
-export interface Breakout { box: Box; closeTime: number; close: number; volumeMultiple: number }
+export interface Breakout { direction: 'long' | 'short'; box: Box; closeTime: number; close: number; volumeMultiple: number }
 export interface Detection { signals: Breakout[]; waiting?: Box & { waited: number } }
 export interface Entry extends Detection { symbol: string; turnover: number }
 export interface Failure { symbol: string; reason: string }

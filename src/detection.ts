@@ -22,12 +22,18 @@ export function detect(candles: Candle[]): Detection {
     const c = candles[i];
     if (box) {
       const age = i - formedIndex;
-      // A lower-bound violation always invalidates, before any breakout check.
       const mean = candles.slice(i - 50, i).reduce((s, x) => s + x.volume, 0) / 50;
-      if (c.close >= box.lower && mean > 0 && c.high > c.low &&
-          c.close >= box.upper + box.atr * .1 && c.volume >= mean * 2 &&
-          (c.close - c.low) / (c.high - c.low) >= .7) {
-        signals.push({ box, closeTime: c.time + INTERVAL, close: c.close, volumeMultiple: c.volume / mean });
+      const range = c.high - c.low;
+      const volumeValid = mean > 0 && range > 0 && c.volume >= mean * 2;
+      const long = volumeValid && c.close >= box.upper + box.atr * .1 &&
+        (c.close - c.low) / range >= .7;
+      const short = volumeValid && c.close <= box.lower - box.atr * .1 &&
+        (c.high - c.close) / range >= .7;
+      // Confirm either direction before lower-bound invalidation or tenth-bar expiry.
+      // A box is consumed by its first signal, regardless of direction.
+      if (long || short) {
+        signals.push({ direction: long ? 'long' : 'short', box, closeTime: c.time + INTERVAL,
+          close: c.close, volumeMultiple: c.volume / mean });
         box = undefined; terminalIndex = i;
       } else if (c.close < box.lower || age >= 10) {
         box = undefined; terminalIndex = i;

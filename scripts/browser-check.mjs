@@ -13,6 +13,7 @@ let mode='success',calls=0;
 const rows=symbol=>{
   const c=Array.from({length:1000},(_,i)=>[String(now-(1000-i)*interval),'100','101','99','100','10','1000']);
   if(symbol==='SOLUSDT') c[49]=[c[49][0],'100','200','1','100','10','1000'];
+  else if(symbol==='ETHUSDT') c[950]=[c[950][0],'100','100','97','97.2','20','1944'];
   else c[950]=[c[950][0],'100','103','100','102.8','20','2056'];
   return c.toReversed();
 };
@@ -39,6 +40,10 @@ try{
   assert.equal(await page.locator('.badge.waiting').count(),1,'current waiting separate');
   await page.getByRole('button',{name:'최근 24시간',exact:true}).click();
   assert.equal(await page.locator('.breakout').count(),2);
+  assert.equal(await page.locator('.breakout.long').count(),1);
+  assert.equal(await page.locator('.breakout.short').count(),1);
+  await page.getByText('상승 돌파 · 롱',{exact:true}).waitFor();
+  await page.getByText('하락 돌파 · 숏',{exact:true}).waitFor();
   const link=await page.locator('.breakout a').first().getAttribute('href');assert.match(link,/BYBIT%3ABTCUSDT.P.*interval=15/);
   await page.getByRole('button',{name:'최근 3시간',exact:true}).click();assert.equal(await page.locator('.breakout').count(),0);
   await page.getByRole('button',{name:'최근 24시간',exact:true}).click();
@@ -58,7 +63,7 @@ try{
   await page.setViewportSize({width:375,height:812});await mkdir('test-results',{recursive:true});await page.screenshot({path:'test-results/mobile-fixture.png',fullPage:true});
   await page.setViewportSize({width:1280,height:900});await page.screenshot({path:'test-results/desktop-fixture.png',fullPage:true});
   assert.deepEqual(errors,[]);
-  console.log('PASS: 360/375px mobile + desktop, automatic full scan, 3/6/24h display, breakout/wait separation, chart link, partial failure, full failure retains labeled old results, cancel, reload. Synthetic fixtures only.');
+  console.log('PASS: 360/375px mobile + desktop, automatic full scan, 3/6/24h display, long/short labels and breakout/wait separation, chart link, partial failure, full failure retains labeled old results, cancel, reload. Synthetic fixtures only.');
   const live=await browser.newContext();const livePage=await live.newPage();await livePage.goto(base);
   const probe=await livePage.evaluate(async()=>{try{const r=await fetch('https://api.bybit.com/v5/market/time',{signal:AbortSignal.timeout(15000)});return {ok:r.ok,status:r.status,body:(await r.text()).slice(0,180)};}catch(e){return {ok:false,error:String(e)};}});
   console.log('LIVE unmocked Bybit browser probe:',JSON.stringify(probe));await live.close();

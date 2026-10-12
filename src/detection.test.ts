@@ -8,7 +8,7 @@ describe('fixed consolidation state machine', () => {
     const c=bars(51); c[50]=breakout(c[50]);
     const r=detect(c); expect(r.signals).toHaveLength(1);
     expect(r.signals[0].box).toMatchObject({upper:101,lower:99,atr:2,start:0,formedAt:50*INTERVAL});
-    expect(r.signals[0].volumeMultiple).toBe(2); expect(r.waiting).toBeUndefined();
+    expect(r.signals[0].direction).toBe('long'); expect(r.signals[0].volumeMultiple).toBe(2); expect(r.waiting).toBeUndefined();
   });
   it('uses all 50 prior volumes rather than 49 or including the candidate', () => {
     const c=bars(51); c[0].volume=510; c[50]=breakout(c[50],39.9);
@@ -63,5 +63,49 @@ describe('history readiness', () => {
     expect(()=>validateHistory(bars(999),1000*INTERVAL)).toThrow('부족');
     const c=bars(1000); c[50].time-=INTERVAL; expect(()=>validateHistory(c,1000*INTERVAL)).toThrow('누락');
     expect(()=>validateHistory(bars(1000),1001*INTERVAL)).toThrow('최신');
+  });
+});
+
+describe('short breakouts', () => {
+  const short = (c: Candle, volume=20): Candle => ({...c,high:100,low:97,close:97.2,volume});
+  it('confirms short before lower invalidation and freezes box and ATR', () => {
+    const c=bars(52); c[50]={...c[50],high:150,low:50,close:100}; c[51]=short(c[51]);
+    const r=detect(c); expect(r.signals).toHaveLength(1);
+    expect(r.signals[0]).toMatchObject({direction:'short',close:97.2,volumeMultiple:2,closeTime:52*INTERVAL});
+    expect(r.signals[0].box).toMatchObject({upper:101,lower:99,atr:2,formedAt:50*INTERVAL});
+    expect(r.waiting).toBeUndefined();
+  });
+  it('accepts exact lower minus ATR threshold and exact 0.7 closing position', () => {
+    const c=bars(51); c[50]={...c[50],open:99,high:99.5,low:98.5,close:98.8,volume:20};
+    expect(detect(c).signals[0].direction).toBe('short');
+    c[50].close=98.81; expect(detect(c).signals).toHaveLength(0);
+  });
+  it('uses exactly 50 prior volumes and excludes the short candle', () => {
+    const c=bars(51); c[0].volume=510; c[50]=short(c[50],39.9);
+    expect(detect(c).signals).toHaveLength(0);
+    c[50].volume=40; expect(detect(c).signals[0].volumeMultiple).toBe(2);
+  });
+  it.each(['low volume','poor close','zero range','zero mean'] as const)('rejects %s and invalidates lower exit', reason => {
+    const c=bars(52); c[50]=short(c[50]);
+    if(reason==='low volume') c[50].volume=19.99;
+    if(reason==='poor close') c[50].low=90;
+    if(reason==='zero range') c[50]={...c[50],open:98,high:98,low:98,close:98};
+    if(reason==='zero mean') c.slice(0,50).forEach(x=>x.volume=0);
+    c[51]=short(c[51],100);
+    expect(detect(c).signals).toHaveLength(0); expect(detect(c).waiting).toBeUndefined();
+  });
+  it('shares one-signal-per-box rule across both directions', () => {
+    for(const direction of ['long','short'] as const) {
+      const c=bars(100);
+      c[50]=direction==='long' ? breakout(c[50]) : short(c[50]);
+      c[51]=direction==='long' ? short(c[51],100) : breakout(c[51],100);
+      const r=detect(c); expect(r.signals).toHaveLength(1);expect(r.signals[0].direction).toBe(direction);expect(r.waiting).toBeUndefined();
+    }
+  });
+  it('accepts short on tenth wait candle and excludes expired or unfinished short', () => {
+    const c=bars(60); c[59]=short(c[59]); expect(detect(c).signals[0].direction).toBe('short');
+    const late=bars(61); late[60]=short(late[60]); expect(detect(late).signals).toHaveLength(0);
+    const unfinished=bars(51); unfinished[50]=short(unfinished[50]);
+    expect(detect(closedCandles(unfinished,50*INTERVAL+1)).signals).toHaveLength(0);
   });
 });
